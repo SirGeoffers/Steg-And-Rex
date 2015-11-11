@@ -101,12 +101,12 @@ function handleComplete() {
 		"animations": {
 			"rex_idle": [0, 4, "rex_idle", 1.0],
 			"rex_run": [16, 23, "rex_run", 1.0],
-			"rex_jumpUp": [33, 33, "rex_jumpUp", 0.0],
-			"rex_jumpDown": [32, 32, "rex_jumpDown", 0.0],
+			"rex_jumpUp": [32, 32, "rex_jumpUp", 0.0],
+			"rex_jumpDown": [33, 33, "rex_jumpDown", 0.0],
 			"steg_idle": [8, 12, "steg_idle", 1.0],
 			"steg_run": [24, 31, "steg_run", 1.0],
-			"steg_jumpUp": [41, 41, "steg_jumpUp", 0.0],
-			"steg_jumpDown": [40, 40, "steg_jumpDown", 0.0],
+			"steg_jumpUp": [40, 40, "steg_jumpUp", 0.0],
+			"steg_jumpDown": [41, 41, "steg_jumpDown", 0.0],
 		}
 	});
 	steg = new Dinosaur(940, 100, "steg", 16, -20, spritesheet);
