@@ -18,7 +18,7 @@ var KEYCODE_W = 87;
 var KEYCODE_A = 65;
 var KEYCODE_D = 68;
 var KEYCODE_S = 0;
-var KEYCODE_SQUIGGLE = 192
+var KEYCODE_SQUIGGLE = 192;
 
 // [GRAPHICS]
 
@@ -143,7 +143,6 @@ function handleComplete() {
 		debugContainer.addChild(n.boundShape);
 		for (var e in n.eggs) {
 			e = n.eggs[e];
-			console.log(e);
 			backContainer.addChild(e.shape);
 		}
 	}
@@ -287,6 +286,13 @@ function tick(event) {
 			d.shape.gotoAndPlay(d.type + "_run");
 		}
 
+	}
+
+	// Check for nest collisions
+	if (!rex.hasEgg && rex.collidesWith(nestList["nest2"])) {
+		rex.grabEgg(nestList["nest2"]);
+	} else if (rex.hasEgg && rex.collidesWith(nestList["nest1"])) {
+		rex.placeEgg(nestList["nest1"]);
 	}
 
 	stage.update(event);
