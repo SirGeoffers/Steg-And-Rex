@@ -33,8 +33,6 @@ function Dinosaur(x, y, type, imageOffsetX, imageOffsetY, spritesheet) {
 
 }
 
-// Additional functionality
-
 Dinosaur.prototype.move = function(dx, dy) {
 	this.x += dx;
 	this.y += dy;
@@ -95,4 +93,86 @@ function Ground(x, y, width, height, imageOffsetX, imageOffsetY, image) {
 	this.boundShape.x = x;
 	this.boundShape.y = y;
 
+}
+
+
+// [NEST]
+var MAX_EGGS = 3;
+var eggInfo = [[54, 0, 30], [18, 0, -30], [36, 0, 0]];
+
+// Constructor
+function Nest(x, y, image, eggImage) {
+
+	this.x = x;
+	this.y = y;
+	this.width = 72;
+	this.height = 36;
+
+	this.imageOffsetX = 0;
+	this.imageOffsetY = 0;
+
+	this.numEggs = 3;
+	this.eggs = [];
+	for (var i = 0; i < MAX_EGGS; i++) {
+		this.eggs.push(new Egg(this.x + eggInfo[i][0], this.y - 12 + eggInfo[i][1], eggImage, eggInfo[i][2]));
+	}
+
+	// Display image
+	this.shape = new createjs.Bitmap(image);
+	this.shape.x = x + this.imageOffsetX;
+	this.shape.y = y + this.imageOffsetY;
+
+	// Debug rect
+	this.boundShape = new createjs.Shape();
+	this.boundShape.graphics.beginFill("#0000ff").drawRect(0, 0, this.width, this.height);
+	this.boundShape.alpha = 0.5;
+	this.boundShape.x = x;
+	this.boundShape.y = y;
+
+}
+
+Nest.prototype.addEgg = function() {
+	if (this.numEggs < MAX_EGGS) {
+		this.eggs[this.numEggs].reveal();
+		numEggs++;
+	}
+}
+
+Nest.prototype.removeEgg = function() {
+	if (this.numEggs > 0) {
+		this.eggs[this.numEggs-1].hide();
+		numEggs--;
+	}
+}
+
+
+// [EGG]
+
+// Constructor
+function Egg(x, y, image, rotation) {
+
+	this.x = x;
+	this.y = y;
+	this.width = 32;
+	this.height = 44;
+
+	this.imageOffsetX = 0;
+	this.imageOffsetY = 0;
+
+	// Display image
+	this.shape = new createjs.Bitmap(image);
+	this.shape.x = x + this.imageOffsetX;
+	this.shape.y = y + this.imageOffsetY;
+	this.shape.regX = 16;
+	this.shape.regY = 22;
+	this.shape.rotation = rotation;
+
+}
+
+Egg.prototype.reveal = function() {
+	this.shape.alpha = 0.0;
+}
+
+Egg.prototype.hide = function() {
+	this.shape.alpha = 1.0;
 }

@@ -6,7 +6,7 @@ var stage;
 
 // [CONSTANTS]
 
-var GRAVITY = 40;
+var GRAVITY = 70;
 
 var KEYCODE_ENTER = 13;
 var KEYCODE_SPACE = 32;
@@ -23,6 +23,7 @@ var KEYCODE_SQUIGGLE = 192
 // [GRAPHICS]
 
 var mainContainer;
+var backContainer;
 var debugContainer;
 
 var bgImg;
@@ -36,6 +37,7 @@ var steg;
 var rex;
 var dinoList = [];
 var groundList = [];
+var nestList = [];
 
 // [PRELOADER]
 
@@ -54,9 +56,11 @@ var rightDown = false;
 var upDown = false;
 
 // Variables
-var dinoSpeed = 300;
-var jumpHeight = 600;
+var dinoSpeed = 400;
+var jumpHeight = 1300;
+var score = [];
 
+// Called when page is loaded
 function init() {
 
 	canvas = document.getElementById("GameStage");
@@ -67,7 +71,9 @@ function init() {
 	manifest = [
 		{src:"dinos4x.png", id: "dinos"},
 		{src:"spring_upper_ground_4x.png", id: "springupperground"},
-		{src:"spring_main_ground_4x.png", id: "springmainground"}
+		{src:"spring_main_ground_4x.png", id: "springmainground"},
+		{src:"nest4x.png", id:"nest"},
+		{src:"egg4x.png", id:"egg"}
 	];
 
 	loader = new createjs.LoadQueue(false);
@@ -79,9 +85,11 @@ function init() {
 
 }
 
+// Called when stage has been created
 function handleComplete() {
 
 	mainContainer = new createjs.Container();
+	backContainer = new createjs.Container();
 	debugContainer = new createjs.Container();
 
 	// Create ground
@@ -109,24 +117,50 @@ function handleComplete() {
 			"steg_jumpDown": [41, 41, "steg_jumpDown", 0.0],
 		}
 	});
-	steg = new Dinosaur(940, 100, "steg", 16, -20, spritesheet);
-	rex = new Dinosaur(640, 100, "rex", 16, -20, spritesheet);
+	steg = new Dinosaur(1000, 400, "steg", 16, -20, spritesheet);
+	rex = new Dinosaur(244, 400, "rex", 16, -20, spritesheet);
+	steg.shape.scaleX = -1;
 
 	dinoList = {steg, rex};
 
+	// Create all the extra stuff (things that don't need attention)
+	var nest1 = new Nest(140, 572, loader.getResult("nest"), loader.getResult("egg"));
+	var nest2 = new Nest(1068, 572, loader.getResult("nest"), loader.getResult("egg"));
+
+	for (var e in nest1.eggs) {
+		mainContainer.addChild(e.shape);
+	}
+
+	nestList = {nest1, nest2};
+
 	// Add everything to the stage
-	mainContainer.addChild(steg.shape);
-	debugContainer.addChild(steg.boundShape);
+	mainContainer.addChild(nest1.shape);
+	debugContainer.addChild(nest1.boundShape);
 
-	mainContainer.addChild(rex.shape);
-	debugContainer.addChild(rex.boundShape);
+	for (var n in nestList) {
+		n = nestList[n];
+		backContainer.addChild(n.shape);
+		debugContainer.addChild(n.boundShape);
+		for (var e in n.eggs) {
+			e = n.eggs[e];
+			console.log(e);
+			backContainer.addChild(e.shape);
+		}
+	}
 
-	for (var i = 0; i < groundList.length; i++) {
-		var g = groundList[i];
+	for (var d in dinoList) {
+		d = dinoList[d];
+		mainContainer.addChild(d.shape);
+		debugContainer.addChild(d.boundShape);
+	}
+
+	for (var g in groundList) {
+		var g = groundList[g];
 		mainContainer.addChild(g.shape);
 		debugContainer.addChild(g.boundShape);
 	}
 
+	stage.addChild(backContainer);
 	stage.addChild(mainContainer);
 	stage.addChild(debugContainer);
 
@@ -138,6 +172,7 @@ function handleComplete() {
 
 }
 
+// Called a lot all of the time
 function tick(event) {
 
 	var deltaS = event.delta / 1000;
@@ -221,9 +256,11 @@ function tick(event) {
 				if (d.yVel > 0) {
 					d.jumping = false;
 					d.jumpReady = true;
+					d.moveTo(d.x, g.y - d.height)
+				} else {
+					d.moveTo(d.x, g.y + d.height)
 				}
 				d.yVel = 0;
-				d.moveTo(d.x, g.y - d.height)
 
 				break;
 
@@ -256,6 +293,7 @@ function tick(event) {
 
 }
 
+// Toggles debug mode (shows hitboxes and other info)
 function toggleDebug() {
 
 	DEBUG = !DEBUG;
@@ -267,6 +305,7 @@ function toggleDebug() {
 
 }
 
+// Called when a key is pressed
 function onKeyDown(event) {
 
 	switch(event.keyCode) {
@@ -303,6 +342,7 @@ function onKeyDown(event) {
 
 }
 
+// Called when a key is released
 function onKeyUp(event) {
 
 	switch(event.keyCode) {
