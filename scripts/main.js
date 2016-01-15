@@ -295,6 +295,13 @@ function tick(event) {
 		rex.placeEgg(nestList["nest1"]);
 	}
 
+	if (!steg.hasEgg && steg.collidesWith(nestList["nest1"])) {
+		steg.grabEgg(nestList["nest1"]);
+	} else if (steg.hasEgg && steg.collidesWith(nestList["nest2"])) {
+		steg.placeEgg(nestList["nest2"]);
+	}
+
+	// Update changes
 	stage.update(event);
 
 }
