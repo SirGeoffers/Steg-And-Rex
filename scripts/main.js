@@ -40,6 +40,7 @@ var groundList = [];
 var nestList = [];
 var signList = [];
 var timer;
+var backgroundList = [];
 
 // [PRELOADER]
 
@@ -80,7 +81,9 @@ function init() {
 		{src:"sign4x.png", id:"sign"},
 		{src:"font2x.png", id:"font2x"},
 		{src:"font4x.png", id:"font4x"},
-		{src:"time_board_4x.png", id:"timer_board"}
+		{src:"time_board_4x.png", id:"timer_board"},
+		{src:"background_front_4x.png", id:"background_front"},
+		{src:"background_back_4x.png", id:"background_back"}
 	];
 
 	loader = new createjs.LoadQueue(false);
@@ -158,7 +161,19 @@ function handleComplete() {
 
 	timerBoard = new TimerBoard(640, 28, 90, loader.getResult("timer_board"), fontSpritesheet4x);
 
+	var backgroundBack1 = new Background(0, 0, 1, loader.getResult("background_back"));
+	var backgroundBack2 = new Background(-1280, 0, 1, loader.getResult("background_back"));
+	var backgroundFront1 = new Background(0, 0, 2, loader.getResult("background_front"));
+	var backgroundFront2 = new Background(-1280, 0, 2, loader.getResult("background_front"));
+	backgroundList = {backgroundBack1, backgroundBack2, backgroundFront1, backgroundFront2};
+
 	// Add everything to the stage
+
+	// Background
+	for (var b in backgroundList) {
+		b = backgroundList[b];
+		backContainer.addChild(b.shape);
+	}
 
 	// Timer
 	backContainer.addChild(timerBoard.timerContainer);
@@ -347,6 +362,12 @@ function tick(event) {
 
 	// Update timer
 	timerBoard.tick(deltaS);
+
+	// Move background
+	for (var b in backgroundList) {
+		b = backgroundList[b];
+		b.move();
+	}
 
 	// Update changes
 	stage.update(event);

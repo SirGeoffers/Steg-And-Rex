@@ -161,9 +161,6 @@ Nest.prototype.removeEgg = function() {
 // Constructor
 function Egg(x, y, image, rotation) {
 
-	this.x = x;
-	this.y = y;
-
 	this.imageOffsetX = 0;
 	this.imageOffsetY = 0;
 
@@ -191,9 +188,6 @@ Egg.prototype.hide = function() {
 // Constructor
 function Sign(x, y, nest, image, fontSpritesheet) {
 
-	this.x = x;
-	this.y = y;
-
 	this.nest = nest;
 
 	// Display image
@@ -217,9 +211,6 @@ Sign.prototype.updateScore = function() {
 
 // Constructor
 function TimerBoard(x, y, initialTime, image, fontSpritesheet) {
-
-	this.x = x;
-	this.y = y;
 
 	this.time = initialTime;
 	this.delta = 0;
@@ -272,10 +263,40 @@ TimerBoard.prototype.tick = function(delta) {
 }
 
 TimerBoard.prototype.updateBoard = function() {
+
+	if (this.time <= 0) {
+		this.minuteSprite.gotoAndStop(0);
+		this.tensSprite.gotoAndStop(0);
+		this.onesSprite.gotoAndStop(0);
+	}
+
 	var minutes = Math.floor(this.time / 60);
 	var tens = Math.floor((this.time - (minutes * 60)) / 10);
 	var ones = this.time % 10;
+	
 	this.minuteSprite.gotoAndStop(minutes);
 	this.tensSprite.gotoAndStop(tens);
 	this.onesSprite.gotoAndStop(ones);
+
+}
+
+
+// [BACKGROUND]
+
+// Constructor
+function Background(x, y, speed, image) {
+
+	this.speed = speed;
+
+	this.shape = new createjs.Bitmap(image);
+	this.shape.x = x;
+	this.shape.y = y;
+
+}
+
+Background.prototype.move = function() {
+	if (this.shape.x > 1280) {
+		this.shape.x = -1280 + this.speed;
+	}
+	this.shape.x += this.speed;
 }
