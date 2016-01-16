@@ -38,6 +38,7 @@ var rex;
 var dinoList = [];
 var groundList = [];
 var nestList = [];
+var signList = [];
 
 // [PRELOADER]
 
@@ -73,7 +74,9 @@ function init() {
 		{src:"spring_upper_ground_4x.png", id: "springupperground"},
 		{src:"spring_main_ground_4x.png", id: "springmainground"},
 		{src:"nest4x.png", id:"nest"},
-		{src:"egg4x.png", id:"egg"}
+		{src:"egg4x.png", id:"egg"},
+		{src:"sign4x.png", id:"sign"},
+		{src:"font2x.png", id:"font2x"}
 	];
 
 	loader = new createjs.LoadQueue(false);
@@ -101,8 +104,15 @@ function handleComplete() {
 	ground = new Ground(56, 600, 1168, 40, 0, -16, loader.getResult("springmainground"));
 	groundList.push(ground);
 
+	// Font setup
+	var fontSpritesheet = new createjs.SpriteSheet({
+		framerate: 10,
+		"images": [loader.getResult("font2x")],
+		"frames": {"regX": 24, "height": 30, "count": 11, "regyY": 0, "width": 26}
+	});
+
 	// Create players
-	var spritesheet = new createjs.SpriteSheet({
+	var dinoSpritesheet = new createjs.SpriteSheet({
 		framerate: 15,
 		"images": [loader.getResult("dinos")],
 		"frames": {"regX": 24, "height": 64, "count": 48, "regyY": 0, "width": 64},
@@ -117,8 +127,8 @@ function handleComplete() {
 			"steg_jumpDown": [41, 41, "steg_jumpDown", 0.0],
 		}
 	});
-	steg = new Dinosaur(1000, 400, "steg", 16, -20, spritesheet);
-	rex = new Dinosaur(244, 400, "rex", 16, -20, spritesheet);
+	steg = new Dinosaur(1000, 400, "steg", 16, -20, dinoSpritesheet);
+	rex = new Dinosaur(244, 400, "rex", 16, -20, dinoSpritesheet);
 	steg.shape.scaleX = -1;
 
 	dinoList = {steg, rex};
@@ -126,17 +136,21 @@ function handleComplete() {
 	// Create all the extra stuff (things that don't need attention)
 	var nest1 = new Nest(140, 572, loader.getResult("nest"), loader.getResult("egg"));
 	var nest2 = new Nest(1068, 572, loader.getResult("nest"), loader.getResult("egg"));
+	var sign1 = new Sign(144, 600, nest1, loader.getResult("sign"), fontSpritesheet);
+	var sign2 = new Sign(1072, 600, nest2, loader.getResult("sign"), fontSpritesheet);
 
 	for (var e in nest1.eggs) {
 		mainContainer.addChild(e.shape);
 	}
 
 	nestList = {nest1, nest2};
+	signList = {sign1, sign2};
 
 	// Add everything to the stage
 	mainContainer.addChild(nest1.shape);
 	debugContainer.addChild(nest1.boundShape);
 
+	// Nests
 	for (var n in nestList) {
 		n = nestList[n];
 		backContainer.addChild(n.shape);
@@ -147,22 +161,33 @@ function handleComplete() {
 		}
 	}
 
+	// Dinos
 	for (var d in dinoList) {
 		d = dinoList[d];
 		mainContainer.addChild(d.shape);
 		debugContainer.addChild(d.boundShape);
 	}
 
+	// Ground pieces
 	for (var g in groundList) {
-		var g = groundList[g];
+		g = groundList[g];
 		mainContainer.addChild(g.shape);
 		debugContainer.addChild(g.boundShape);
 	}
 
+	// Signs
+	for (var s in signList) {
+		s = signList[s];
+		mainContainer.addChild(s.shape);
+		mainContainer.addChild(s.scoreShape);
+	}
+
+	// Image containers
 	stage.addChild(backContainer);
 	stage.addChild(mainContainer);
 	stage.addChild(debugContainer);
 
+	// Check for debug mode (~)
 	if (!DEBUG) debugContainer.alpha = 0;
 
 	// Ticker
@@ -299,6 +324,12 @@ function tick(event) {
 		steg.grabEgg(nestList["nest1"]);
 	} else if (steg.hasEgg && steg.collidesWith(nestList["nest2"])) {
 		steg.placeEgg(nestList["nest2"]);
+	}
+
+	// Update scores
+	for (var s in signList) {
+		s = signList[s];
+		s.updateScore();
 	}
 
 	// Update changes
