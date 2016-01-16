@@ -163,8 +163,6 @@ function Egg(x, y, image, rotation) {
 
 	this.x = x;
 	this.y = y;
-	this.width = 32;
-	this.height = 44;
 
 	this.imageOffsetX = 0;
 	this.imageOffsetY = 0;
@@ -195,8 +193,6 @@ function Sign(x, y, nest, image, fontSpritesheet) {
 
 	this.x = x;
 	this.y = y;
-	this.width = 60;
-	this.height = 64;
 
 	this.nest = nest;
 
@@ -214,4 +210,72 @@ function Sign(x, y, nest, image, fontSpritesheet) {
 
 Sign.prototype.updateScore = function() {
 	this.scoreShape.gotoAndStop(this.nest.numEggs);
+}
+
+
+// [TIMER]
+
+// Constructor
+function TimerBoard(x, y, initialTime, image, fontSpritesheet) {
+
+	this.x = x;
+	this.y = y;
+
+	this.time = initialTime;
+	this.delta = 0;
+
+	this.shape = new createjs.Bitmap(image);
+	this.shape.x = x;
+	this.shape.y = y;
+	this.shape.regX = 160;
+
+	// Setup for timer numbers and colon
+	var colon = new createjs.Sprite(fontSpritesheet);
+	colon.gotoAndStop(10);
+	colon.x = x - 56;
+	colon.y = 64;
+
+	this.minuteSprite = new createjs.Sprite(fontSpritesheet);
+	this.minuteSprite.gotoAndStop(0);
+	this.minuteSprite.x = x - 116;
+	this.minuteSprite.y = 64;
+
+	this.tensSprite = new createjs.Sprite(fontSpritesheet);
+	this.tensSprite.gotoAndStop(0);
+	this.tensSprite.x = x + 4;
+	this.tensSprite.y = 64;
+
+	this.onesSprite = new createjs.Sprite(fontSpritesheet);
+	this.onesSprite.gotoAndStop(0);
+	this.onesSprite.x = x + 64;
+	this.onesSprite.y = 64;
+
+	// Add everything to a container for ease of use
+	this.timerContainer = new createjs.Container();
+	this.timerContainer.addChild(this.shape);
+	this.timerContainer.addChild(colon);
+	this.timerContainer.addChild(this.minuteSprite);
+	this.timerContainer.addChild(this.tensSprite);
+	this.timerContainer.addChild(this.onesSprite);
+
+	this.updateBoard();
+
+}
+
+TimerBoard.prototype.tick = function(delta) {
+	this.delta += delta;
+	if (this.delta > 1) {
+		this.delta--;
+		this.time--;
+		this.updateBoard();
+	}
+}
+
+TimerBoard.prototype.updateBoard = function() {
+	var minutes = Math.floor(this.time / 60);
+	var tens = Math.floor((this.time - (minutes * 60)) / 10);
+	var ones = this.time % 10;
+	this.minuteSprite.gotoAndStop(minutes);
+	this.tensSprite.gotoAndStop(tens);
+	this.onesSprite.gotoAndStop(ones);
 }

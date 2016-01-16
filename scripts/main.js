@@ -39,6 +39,7 @@ var dinoList = [];
 var groundList = [];
 var nestList = [];
 var signList = [];
+var timer;
 
 // [PRELOADER]
 
@@ -77,7 +78,9 @@ function init() {
 		{src:"egg_rex_4x.png", id:"egg_rex"},
 		{src:"egg_steg_4x.png", id:"egg_steg"},
 		{src:"sign4x.png", id:"sign"},
-		{src:"font2x.png", id:"font2x"}
+		{src:"font2x.png", id:"font2x"},
+		{src:"font4x.png", id:"font4x"},
+		{src:"time_board_4x.png", id:"timer_board"}
 	];
 
 	loader = new createjs.LoadQueue(false);
@@ -110,6 +113,12 @@ function handleComplete() {
 		framerate: 10,
 		"images": [loader.getResult("font2x")],
 		"frames": {"regX": 24, "height": 30, "count": 11, "regyY": 0, "width": 26}
+	});
+
+	var fontSpritesheet4x = new createjs.SpriteSheet({
+		framerate: 10,
+		"images": [loader.getResult("font4x")],
+		"frames": {"regX": 0, "height": 60, "count": 11, "regyY": 0, "width": 52}
 	});
 
 	// Create players
@@ -147,9 +156,12 @@ function handleComplete() {
 	nestList = {nest1, nest2};
 	signList = {sign1, sign2};
 
+	timerBoard = new TimerBoard(640, 28, 90, loader.getResult("timer_board"), fontSpritesheet4x);
+
 	// Add everything to the stage
-	mainContainer.addChild(nest1.shape);
-	debugContainer.addChild(nest1.boundShape);
+
+	// Timer
+	backContainer.addChild(timerBoard.timerContainer);
 
 	// Nests
 	for (var n in nestList) {
@@ -332,6 +344,9 @@ function tick(event) {
 		s = signList[s];
 		s.updateScore();
 	}
+
+	// Update timer
+	timerBoard.tick(deltaS);
 
 	// Update changes
 	stage.update(event);
