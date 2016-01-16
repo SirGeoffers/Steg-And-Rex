@@ -61,7 +61,6 @@ var upDown = false;
 // Variables
 var dinoSpeed = 400;
 var jumpHeight = 1300;
-var score = [];
 
 // Called when page is loaded
 function init() {
@@ -78,6 +77,8 @@ function init() {
 		{src:"nest4x.png", id:"nest"},
 		{src:"egg_rex_4x.png", id:"egg_rex"},
 		{src:"egg_steg_4x.png", id:"egg_steg"},
+		{src:"egg_sack_rex_4x.png", id:"egg_sack_rex"},
+		{src:"egg_sack_steg_4x.png", id:"egg_sack_steg"},
 		{src:"sign4x.png", id:"sign"},
 		{src:"font2x.png", id:"font2x"},
 		{src:"font4x.png", id:"font4x"},
@@ -140,9 +141,9 @@ function handleComplete() {
 			"steg_jumpDown": [41, 41, "steg_jumpDown", 0.0],
 		}
 	});
-	steg = new Dinosaur(1000, 400, "steg", 16, -20, dinoSpritesheet);
-	rex = new Dinosaur(244, 400, "rex", 16, -20, dinoSpritesheet);
-	steg.shape.scaleX = -1;
+	steg = new Dinosaur(1000, 400, "steg", 16, -20, dinoSpritesheet, loader.getResult("egg_sack_steg"));
+	rex = new Dinosaur(244, 400, "rex", 16, -20, dinoSpritesheet, loader.getResult("egg_sack_rex"));
+	steg.dinoContainer.scaleX = -1;
 
 	dinoList = {steg, rex};
 
@@ -192,7 +193,7 @@ function handleComplete() {
 	// Dinos
 	for (var d in dinoList) {
 		d = dinoList[d];
-		mainContainer.addChild(d.shape);
+		mainContainer.addChild(d.dinoContainer);
 		debugContainer.addChild(d.boundShape);
 	}
 
@@ -232,10 +233,10 @@ function tick(event) {
 	// Update Rex x velocity
 	if (aDown && !dDown) {
 		rex.xVel = -dinoSpeed;
-		rex.shape.scaleX = -1;
+		rex.dinoContainer.scaleX = -1;
 	} else if (dDown && !aDown) {
 		rex.xVel = dinoSpeed;
-		rex.shape.scaleX = 1;
+		rex.dinoContainer.scaleX = 1;
 	} else {
 		rex.xVel = 0;
 	}
@@ -243,10 +244,10 @@ function tick(event) {
 	// Update Steg x velocity
 	if (leftDown && !rightDown) {
 		steg.xVel = -dinoSpeed;
-		steg.shape.scaleX = -1;
+		steg.dinoContainer.scaleX = -1;
 	} else if (rightDown && !leftDown) {
 		steg.xVel = dinoSpeed;
-		steg.shape.scaleX = 1;
+		steg.dinoContainer.scaleX = 1;
 	} else {
 		steg.xVel = 0;
 	}
@@ -271,6 +272,13 @@ function tick(event) {
 	for (var d in dinoList) {
 
 		d = dinoList[d];
+
+		// Hide / Reveal Egg (current carrying?)
+		if (d.hasEgg) {
+			d.showSack();
+		} else {
+			d.hideSack();
+		}
 
 		// Move in x direction
 		d.move(d.xVel * deltaS, 0);

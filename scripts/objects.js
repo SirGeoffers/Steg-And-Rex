@@ -2,7 +2,7 @@
 // [DINOSAUR] (rawr)
 
 // Constructor
-function Dinosaur(x, y, type, imageOffsetX, imageOffsetY, spritesheet) {
+function Dinosaur(x, y, type, imageOffsetX, imageOffsetY, spritesheet, sackImage) {
 
 	this.type = type;
 
@@ -24,7 +24,14 @@ function Dinosaur(x, y, type, imageOffsetX, imageOffsetY, spritesheet) {
 	this.hasEgg = false;
 
 	// Display image
+	this.dinoContainer = new createjs.Container();
 	this.shape = new createjs.Sprite(spritesheet, this.type + "_idle");
+	this.sack = new createjs.Bitmap(sackImage);
+	this.dinoContainer.addChild(this.sack);
+	this.dinoContainer.addChild(this.shape);
+
+	this.sack.x = -28;
+	this.sack.y = -8;
 
 	// Debug rect
 	this.boundShape = new createjs.Shape();
@@ -57,9 +64,17 @@ Dinosaur.prototype.placeEgg = function(nest) {
 	nest.addEgg();
 }
 
+Dinosaur.prototype.showSack = function() {
+	this.sack.alpha = 1.0;
+}
+
+Dinosaur.prototype.hideSack = function() {
+	this.sack.alpha = 0.0;
+}
+
 Dinosaur.prototype.updateShapes = function() {
-	this.shape.x = this.x + this.imageOffsetX;
-	this.shape.y = this.y + this.imageOffsetY;
+	this.dinoContainer.x = this.x + this.imageOffsetX;
+	this.dinoContainer.y = this.y + this.imageOffsetY;
 	this.boundShape.x = this.x;
 	this.boundShape.y = this.y;
 }
