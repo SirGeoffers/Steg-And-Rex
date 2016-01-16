@@ -74,7 +74,8 @@ function init() {
 		{src:"spring_upper_ground_4x.png", id: "springupperground"},
 		{src:"spring_main_ground_4x.png", id: "springmainground"},
 		{src:"nest4x.png", id:"nest"},
-		{src:"egg4x.png", id:"egg"},
+		{src:"egg_rex_4x.png", id:"egg_rex"},
+		{src:"egg_steg_4x.png", id:"egg_steg"},
 		{src:"sign4x.png", id:"sign"},
 		{src:"font2x.png", id:"font2x"}
 	];
@@ -134,8 +135,8 @@ function handleComplete() {
 	dinoList = {steg, rex};
 
 	// Create all the extra stuff (things that don't need attention)
-	var nest1 = new Nest(140, 572, loader.getResult("nest"), loader.getResult("egg"));
-	var nest2 = new Nest(1068, 572, loader.getResult("nest"), loader.getResult("egg"));
+	var nest1 = new Nest(140, 572, loader.getResult("nest"), loader.getResult("egg_rex"));
+	var nest2 = new Nest(1068, 572, loader.getResult("nest"), loader.getResult("egg_steg"));
 	var sign1 = new Sign(144, 600, nest1, loader.getResult("sign"), fontSpritesheet);
 	var sign2 = new Sign(1072, 600, nest2, loader.getResult("sign"), fontSpritesheet);
 
