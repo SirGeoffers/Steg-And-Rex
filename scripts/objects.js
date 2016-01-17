@@ -2,7 +2,7 @@
 // [DINOSAUR] (rawr)
 
 // Constructor
-function Dinosaur(x, y, type, imageOffsetX, imageOffsetY, spritesheet, sackImage) {
+function Dinosaur(x, y, type, imageOffsetX, imageOffsetY, spritesheet, sackImage, ballImage) {
 
 	this.type = type;
 
@@ -20,18 +20,31 @@ function Dinosaur(x, y, type, imageOffsetX, imageOffsetY, spritesheet, sackImage
 
 	this.jumping = true;
 	this.jumpReady = false;
-
 	this.hasEgg = false;
+	this.attacking = false;
+
+	this.attackTimer = 0;
 
 	// Display image
+	this.mainContainer = new createjs.Container();
+
 	this.dinoContainer = new createjs.Container();
 	this.shape = new createjs.Sprite(spritesheet, this.type + "_idle");
 	this.sack = new createjs.Bitmap(sackImage);
+	this.sack.x = -28;
+	this.sack.y = -8;
 	this.dinoContainer.addChild(this.sack);
 	this.dinoContainer.addChild(this.shape);
 
-	this.sack.x = -28;
-	this.sack.y = -8;
+	this.ball = new createjs.Bitmap(ballImage);
+	this.ball.regX = 32;
+	this.ball.regY = 32;
+	this.ball.x = 0;
+	this.ball.y = 32;
+	this.ball.alpha = 0.0;
+
+	this.mainContainer.addChild(this.dinoContainer);
+	this.mainContainer.addChild(this.ball);
 
 	// Debug rect
 	this.boundShape = new createjs.Shape();
@@ -72,9 +85,23 @@ Dinosaur.prototype.hideSack = function() {
 	this.sack.alpha = 0.0;
 }
 
+Dinosaur.prototype.attack = function() {
+	this.attacking = true;
+	this.attackTimer = 0.2;
+	this.ball.rotation = 0;
+	this.ball.alpha = 1;
+	this.dinoContainer.alpha = 0;
+}
+
+Dinosaur.prototype.stopAttacking = function() {
+	this.attacking = false;
+	this.ball.alpha = 0;
+	this.dinoContainer.alpha = 1;
+}
+
 Dinosaur.prototype.updateShapes = function() {
-	this.dinoContainer.x = this.x + this.imageOffsetX;
-	this.dinoContainer.y = this.y + this.imageOffsetY;
+	this.mainContainer.x = this.x + this.imageOffsetX;
+	this.mainContainer.y = this.y + this.imageOffsetY;
 	this.boundShape.x = this.x;
 	this.boundShape.y = this.y;
 }

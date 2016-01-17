@@ -13,11 +13,11 @@ var KEYCODE_SPACE = 32;
 var KEYCODE_UP = 38;
 var KEYCODE_LEFT = 37;
 var KEYCODE_RIGHT = 39;
-var KEYCODE_DOWN = 36;
+var KEYCODE_DOWN = 40;
 var KEYCODE_W = 87;
 var KEYCODE_A = 65;
 var KEYCODE_D = 68;
-var KEYCODE_S = 0;
+var KEYCODE_S = 83;
 var KEYCODE_SQUIGGLE = 192;
 
 // [GRAPHICS]
@@ -54,12 +54,15 @@ var totalLoaded = 0;
 var aDown = false;
 var dDown = false;
 var wDown = false;
+var sDown = false;
 var leftDown = false;
 var rightDown = false;
 var upDown = false;
+var downDown = false;
 
 // Variables
 var dinoSpeed = 400;
+var attackSpeed = 1000;
 var jumpHeight = 1300;
 
 // Called when page is loaded
@@ -79,6 +82,8 @@ function init() {
 		{src:"egg_steg_4x.png", id:"egg_steg"},
 		{src:"egg_sack_rex_4x.png", id:"egg_sack_rex"},
 		{src:"egg_sack_steg_4x.png", id:"egg_sack_steg"},
+		{src:"ball_rex_4x.png", id:"ball_rex"},
+		{src:"ball_steg_4x.png", id:"ball_steg"},
 		{src:"sign4x.png", id:"sign"},
 		{src:"font2x.png", id:"font2x"},
 		{src:"font4x.png", id:"font4x"},
@@ -141,9 +146,9 @@ function handleComplete() {
 			"steg_jumpDown": [41, 41, "steg_jumpDown", 0.0],
 		}
 	});
-	steg = new Dinosaur(1000, 400, "steg", 16, -20, dinoSpritesheet, loader.getResult("egg_sack_steg"));
-	rex = new Dinosaur(244, 400, "rex", 16, -20, dinoSpritesheet, loader.getResult("egg_sack_rex"));
-	steg.dinoContainer.scaleX = -1;
+	steg = new Dinosaur(1000, 400, "steg", 16, -20, dinoSpritesheet, loader.getResult("egg_sack_steg"), loader.getResult("ball_steg"));
+	rex = new Dinosaur(244, 400, "rex", 16, -20, dinoSpritesheet, loader.getResult("egg_sack_rex"), loader.getResult("ball_rex"));
+	steg.mainContainer.scaleX = -1;
 
 	dinoList = {steg, rex};
 
@@ -193,7 +198,7 @@ function handleComplete() {
 	// Dinos
 	for (var d in dinoList) {
 		d = dinoList[d];
-		mainContainer.addChild(d.dinoContainer);
+		mainContainer.addChild(d.mainContainer);
 		debugContainer.addChild(d.boundShape);
 	}
 
@@ -230,48 +235,80 @@ function tick(event) {
 
 	var deltaS = event.delta / 1000;
 
-	// Update Rex x velocity
-	if (aDown && !dDown) {
-		rex.xVel = -dinoSpeed;
-		rex.dinoContainer.scaleX = -1;
-	} else if (dDown && !aDown) {
-		rex.xVel = dinoSpeed;
-		rex.dinoContainer.scaleX = 1;
-	} else {
-		rex.xVel = 0;
+	// Check for attack command
+	if (sDown) {
+		rex.attack();
 	}
 
-	// Update Steg x velocity
-	if (leftDown && !rightDown) {
-		steg.xVel = -dinoSpeed;
-		steg.dinoContainer.scaleX = -1;
-	} else if (rightDown && !leftDown) {
-		steg.xVel = dinoSpeed;
-		steg.dinoContainer.scaleX = 1;
-	} else {
-		steg.xVel = 0;
+	if (downDown) {
+		steg.attack();
 	}
 
-	// Update Rex y velocity
-	rex.yVel += GRAVITY;
-	if (wDown && rex.jumpReady && !rex.jumping) {
-		rex.jumping = true;
-		rex.jumpReady = false;
-		rex.yVel = -jumpHeight;
+	if (!rex.attacking) {
+
+		// Update Rex x velocity
+		if (aDown && !dDown) {
+			rex.xVel = -dinoSpeed;
+			rex.mainContainer.scaleX = -1;
+		} else if (dDown && !aDown) {
+			rex.xVel = dinoSpeed;
+			rex.mainContainer.scaleX = 1;
+		} else {
+			rex.xVel = 0;
+		}
+
+		// Update Rex y velocity
+		rex.yVel += GRAVITY;
+		if (wDown && rex.jumpReady && !rex.jumping) {
+			rex.jumping = true;
+			rex.jumpReady = false;
+			rex.yVel = -jumpHeight;
+		}
+
 	}
 
-	// Update Steg y velocity
-	steg.yVel += GRAVITY;
-	if (upDown && steg.jumpReady && !steg.jumping) {
-		steg.jumping = true;
-		steg.jumpReady = false;
-		steg.yVel = -jumpHeight;
+	if (!steg.attacking) {
+
+		// Update Steg x velocity
+		if (leftDown && !rightDown) {
+			steg.xVel = -dinoSpeed;
+			steg.mainContainer.scaleX = -1;
+		} else if (rightDown && !leftDown) {
+			steg.xVel = dinoSpeed;
+			steg.mainContainer.scaleX = 1;
+		} else {
+			steg.xVel = 0;
+		}
+
+		// Update Steg y velocity
+		steg.yVel += GRAVITY;
+		if (upDown && steg.jumpReady && !steg.jumping) {
+			steg.jumping = true;
+			steg.jumpReady = false;
+			steg.yVel = -jumpHeight;
+		}
+
 	}
 
 	// Update dinosaur positions based on input
 	for (var d in dinoList) {
 
 		d = dinoList[d];
+
+		if (d.attacking) {
+
+			d.ball.rotation += 30;
+			d.xVel = attackSpeed * d.mainContainer.scaleX;
+			d.yVel = 0;
+
+			d.attackTimer -= deltaS;
+			if (d.attackTimer < 0) {
+				d.stopAttacking();
+				d.xVel = 0;
+				d.yVel = 0;
+			}
+
+		}
 
 		// Hide / Reveal Egg (current carrying?)
 		if (d.hasEgg) {
@@ -396,7 +433,7 @@ function toggleDebug() {
 
 // Called when a key is pressed
 function onKeyDown(event) {
-
+	
 	switch(event.keyCode) {
 
 		case KEYCODE_A:
