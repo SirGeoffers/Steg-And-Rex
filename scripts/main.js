@@ -236,11 +236,11 @@ function tick(event) {
 	var deltaS = event.delta / 1000;
 
 	// Check for attack command
-	if (sDown) {
+	if (sDown && rex.canAttack) {
 		rex.attack();
 	}
 
-	if (downDown) {
+	if (downDown && steg.canAttack) {
 		steg.attack();
 	}
 
@@ -295,13 +295,19 @@ function tick(event) {
 
 		d = dinoList[d];
 
+		if (!d.canAttack) {
+			d.attackTimer -= deltaS;
+			if (d.attackTimer < -1) {
+				d.canAttack = true;
+			}
+		}
+
 		if (d.attacking) {
 
 			d.ball.rotation += 30;
 			d.xVel = attackSpeed * d.mainContainer.scaleX;
 			d.yVel = 0;
 
-			d.attackTimer -= deltaS;
 			if (d.attackTimer < 0) {
 				d.stopAttacking();
 				d.xVel = 0;
@@ -319,6 +325,15 @@ function tick(event) {
 
 		// Move in x direction
 		d.move(d.xVel * deltaS, 0);
+
+		// Prevent dino from moving off sides
+		if (d.x < 8) {
+			d.x = 8;
+			d.xVel = 0;
+		} else if (d.x > 1240) {
+			d.x = 1240;
+			d.xVel = 0;
+		}
 
 		// Check for collision
 		for (var i = 0; i < groundList.length; i++) {
@@ -340,8 +355,18 @@ function tick(event) {
 
 		}
 
+		// Limit y velocity
+		if (d.yVel > 1500) {
+			d.yVel = 1500;
+		}
+
 		// Move in y direction
 		d.move(0, d.yVel * deltaS);
+
+		// Loop if fell below screen
+		if (d.y > 750) {
+			d.y = 0;
+		}
 
 		//Check for collision
 		for (var i = 0; i < groundList.length; i++) {

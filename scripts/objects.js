@@ -22,6 +22,7 @@ function Dinosaur(x, y, type, imageOffsetX, imageOffsetY, spritesheet, sackImage
 	this.jumpReady = false;
 	this.hasEgg = false;
 	this.attacking = false;
+	this.canAttack = true;
 
 	this.attackTimer = 0;
 
@@ -87,6 +88,7 @@ Dinosaur.prototype.hideSack = function() {
 
 Dinosaur.prototype.attack = function() {
 	this.attacking = true;
+	this.canAttack = false;
 	this.attackTimer = 0.2;
 	this.ball.rotation = 0;
 	this.ball.alpha = 1;
