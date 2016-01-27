@@ -322,6 +322,9 @@ function tick(event) {
 				d.invulnerable = true;
 				d.invulnerableTimer = 0;
 			}
+			if (!d.jumping) {
+				d.xVel = 0;
+			}
 		}
 
 		if (d.invulnerable) {
@@ -459,13 +462,13 @@ function tick(event) {
 	}
 
 	// Check for nest collisions
-	if (!rex.hasEgg && rex.collidesWith(nestList["steg"])) {
+	if (!rex.hasEgg && rex.collidesWith(nestList["steg"]) && nestList["steg"].numEggs > 0) {
 		rex.grabEgg(nestList["steg"]);
 	} else if (rex.hasEgg && rex.collidesWith(nestList["rex"])) {
 		rex.placeEgg(nestList["rex"]);
 	}
 
-	if (!steg.hasEgg && steg.collidesWith(nestList["rex"])) {
+	if (!steg.hasEgg && steg.collidesWith(nestList["rex"]) && nestList["rex"].numEggs > 0) {
 		steg.grabEgg(nestList["rex"]);
 	} else if (steg.hasEgg && steg.collidesWith(nestList["steg"])) {
 		steg.placeEgg(nestList["steg"]);
