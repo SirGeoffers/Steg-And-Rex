@@ -24,3 +24,9 @@ Attack: S
 Move: Left & Right arrows
 Jump: Up arrow
 Attack: Down arrow
+
+## Todo
+Main game functionality - DONE<br>
+End game screen<br>
+Main menu<br>
+More stages<br>
