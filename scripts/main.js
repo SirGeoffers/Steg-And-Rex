@@ -140,10 +140,12 @@ function handleComplete() {
 			"rex_run": [16, 23, "rex_run", 1.0],
 			"rex_jumpUp": [32, 32, "rex_jumpUp", 0.0],
 			"rex_jumpDown": [33, 33, "rex_jumpDown", 0.0],
+			"rex_stunned": [39, 39, "rex_stunned", 0.0],
 			"steg_idle": [8, 12, "steg_idle", 1.0],
 			"steg_run": [24, 31, "steg_run", 1.0],
 			"steg_jumpUp": [40, 40, "steg_jumpUp", 0.0],
 			"steg_jumpDown": [41, 41, "steg_jumpDown", 0.0],
+			"steg_stunned": [47, 47, "steg_stunned", 0.0]
 		}
 	});
 	steg = new Dinosaur(1000, 400, "steg", 16, -20, dinoSpritesheet, loader.getResult("egg_sack_steg"), loader.getResult("ball_steg"));
@@ -162,7 +164,8 @@ function handleComplete() {
 		mainContainer.addChild(e.shape);
 	}
 
-	nestList = {nest1, nest2};
+	nestList["rex"] = nest1;
+	nestList["steg"] = nest2;
 	signList = {sign1, sign2};
 
 	timerBoard = new TimerBoard(640, 28, 90, loader.getResult("timer_board"), fontSpritesheet4x);
@@ -236,30 +239,37 @@ function tick(event) {
 	var deltaS = event.delta / 1000;
 
 	// Check for attack command
-	if (sDown && rex.canAttack) {
-		rex.attack();
+	if (!rex.stunned) {
+		if (sDown && rex.canAttack) {
+			rex.attack();
+		}
 	}
-
-	if (downDown && steg.canAttack) {
-		steg.attack();
+	
+	if (!steg.stunned) {
+		if (downDown && steg.canAttack) {
+			steg.attack();
+		}
 	}
 
 	if (!rex.attacking) {
 
 		// Update Rex x velocity
-		if (aDown && !dDown) {
-			rex.xVel = -dinoSpeed;
-			rex.mainContainer.scaleX = -1;
-		} else if (dDown && !aDown) {
-			rex.xVel = dinoSpeed;
-			rex.mainContainer.scaleX = 1;
-		} else {
-			rex.xVel = 0;
+		if (!rex.stunned) {
+			if (aDown && !dDown) {
+				rex.xVel = -dinoSpeed;
+				rex.mainContainer.scaleX = -1;
+			} else if (dDown && !aDown) {
+				rex.xVel = dinoSpeed;
+				rex.mainContainer.scaleX = 1;
+			} else {
+				rex.xVel = 0;
+			}
 		}
+		
 
 		// Update Rex y velocity
 		rex.yVel += GRAVITY;
-		if (wDown && rex.jumpReady && !rex.jumping) {
+		if (wDown && rex.jumpReady && !rex.jumping && !rex.stunned) {
 			rex.jumping = true;
 			rex.jumpReady = false;
 			rex.yVel = -jumpHeight;
@@ -270,19 +280,22 @@ function tick(event) {
 	if (!steg.attacking) {
 
 		// Update Steg x velocity
-		if (leftDown && !rightDown) {
-			steg.xVel = -dinoSpeed;
-			steg.mainContainer.scaleX = -1;
-		} else if (rightDown && !leftDown) {
-			steg.xVel = dinoSpeed;
-			steg.mainContainer.scaleX = 1;
-		} else {
-			steg.xVel = 0;
+		if (!steg.stunned) {
+			if (leftDown && !rightDown) {
+				steg.xVel = -dinoSpeed;
+				steg.mainContainer.scaleX = -1;
+			} else if (rightDown && !leftDown) {
+				steg.xVel = dinoSpeed;
+				steg.mainContainer.scaleX = 1;
+			} else {
+				steg.xVel = 0;
+			}
 		}
+		
 
 		// Update Steg y velocity
 		steg.yVel += GRAVITY;
-		if (upDown && steg.jumpReady && !steg.jumping) {
+		if (upDown && steg.jumpReady && !steg.jumping && !steg.stunned) {
 			steg.jumping = true;
 			steg.jumpReady = false;
 			steg.yVel = -jumpHeight;
@@ -299,6 +312,24 @@ function tick(event) {
 			d.attackTimer -= deltaS;
 			if (d.attackTimer < -1) {
 				d.canAttack = true;
+			}
+		}
+
+		if (d.stunned) {
+			d.stunTimer -= deltaS;
+			if (d.stunTimer < 0) {
+				d.stunned = false;
+				d.invulnerable = true;
+				d.invulnerableTimer = 0;
+			}
+		}
+
+		if (d.invulnerable) {
+			d.invulnerableTimer += deltaS;
+			d.shape.alpha = Math.sin(d.invulnerableTimer * 20) * 0.4 + 0.5;
+			if (d.invulnerableTimer > 2) {
+				d.invulnerable = false;
+				d.shape.alpha = 1.0;
 			}
 		}
 
@@ -335,7 +366,7 @@ function tick(event) {
 			d.xVel = 0;
 		}
 
-		// Check for collision
+		// Check for collision with ground in x direction
 		for (var i = 0; i < groundList.length; i++) {
 
 			var g = groundList[i];
@@ -368,7 +399,7 @@ function tick(event) {
 			d.y = 0;
 		}
 
-		//Check for collision
+		//Check for collision with ground in y direction
 		for (var i = 0; i < groundList.length; i++) {
 
 			var g = groundList[i];
@@ -390,6 +421,20 @@ function tick(event) {
 
 		}
 
+		// Check for collision with attacking dinos
+		for (var otherD in dinoList) {
+			otherD = dinoList[otherD];
+			if (otherD.type != d.type) {
+				if (d.collidesWith(otherD) && d.attacking && !otherD.attacking && !otherD.invulnerable) {
+					otherD.stun();
+					if (otherD.hasEgg) {
+						otherD.hasEgg = false;
+						nestList[d.type].addEgg();
+					}
+				}
+			}
+		}
+
 		// Check if falling
 		if (d.yVel > 0) {
 			d.jumpReady = false;
@@ -397,7 +442,9 @@ function tick(event) {
 		}
 
 		// Update animations
-		if (d.jumping) {
+		if (d.stunned) {
+			d.shape.gotoAndPlay(d.type + "_stunned");
+		} else if (d.jumping) {
 			if (d.yVel < 0) {
 				d.shape.gotoAndPlay(d.type + "_jumpUp");
 			} else {
@@ -412,16 +459,16 @@ function tick(event) {
 	}
 
 	// Check for nest collisions
-	if (!rex.hasEgg && rex.collidesWith(nestList["nest2"])) {
-		rex.grabEgg(nestList["nest2"]);
-	} else if (rex.hasEgg && rex.collidesWith(nestList["nest1"])) {
-		rex.placeEgg(nestList["nest1"]);
+	if (!rex.hasEgg && rex.collidesWith(nestList["steg"])) {
+		rex.grabEgg(nestList["steg"]);
+	} else if (rex.hasEgg && rex.collidesWith(nestList["rex"])) {
+		rex.placeEgg(nestList["rex"]);
 	}
 
-	if (!steg.hasEgg && steg.collidesWith(nestList["nest1"])) {
-		steg.grabEgg(nestList["nest1"]);
-	} else if (steg.hasEgg && steg.collidesWith(nestList["nest2"])) {
-		steg.placeEgg(nestList["nest2"]);
+	if (!steg.hasEgg && steg.collidesWith(nestList["rex"])) {
+		steg.grabEgg(nestList["rex"]);
+	} else if (steg.hasEgg && steg.collidesWith(nestList["steg"])) {
+		steg.placeEgg(nestList["steg"]);
 	}
 
 	// Update scores

@@ -21,10 +21,15 @@ function Dinosaur(x, y, type, imageOffsetX, imageOffsetY, spritesheet, sackImage
 	this.jumping = true;
 	this.jumpReady = false;
 	this.hasEgg = false;
+
 	this.attacking = false;
 	this.canAttack = true;
-
 	this.attackTimer = 0;
+
+	this.stunned = false;
+	this.stunTimer = 0;
+	this.invulnerable = false;
+	this.invulnerableTimer = 0;
 
 	// Display image
 	this.mainContainer = new createjs.Container();
@@ -99,6 +104,11 @@ Dinosaur.prototype.stopAttacking = function() {
 	this.attacking = false;
 	this.ball.alpha = 0;
 	this.dinoContainer.alpha = 1;
+}
+
+Dinosaur.prototype.stun = function() {
+	this.stunned = true;
+	this.stunTimer = 1.5;	
 }
 
 Dinosaur.prototype.updateShapes = function() {
