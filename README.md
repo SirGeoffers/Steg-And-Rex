@@ -16,6 +16,9 @@ You can steal eggs from your opponents by walking over their nest and then retur
 Each player can attack the other, momentarilly stunning the oppenent and returning any eggs that the oppenent was carrying back to the original owner's nest.
 
 ## Controls
+#### Menu
+Up/Down: Change selection
+Right: Select option
 #### Rex (Left player)
 Move: A & D
 Jump: W
