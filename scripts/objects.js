@@ -354,3 +354,26 @@ Background.prototype.move = function() {
 	}
 	this.shape.x += this.speed;
 }
+
+// [MENU BUTTON]
+
+// Constructor
+function MenuButton(x, y, type, spritesheet) {
+
+	this.type = type;
+
+	this.shape = new createjs.Sprite(spritesheet);
+	this.shape.gotoAndStop(this.type + "_off");
+
+	this.shape.x = x;
+	this.shape.y = y;
+
+}
+
+MenuButton.prototype.select = function() {
+	this.shape.gotoAndStop(this.type + "_on");
+}
+
+MenuButton.prototype.deselect = function() {
+	this.shape.gotoAndStop(this.type + "_off");
+}

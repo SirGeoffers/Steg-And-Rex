@@ -20,10 +20,21 @@ var KEYCODE_D = 68;
 var KEYCODE_S = 83;
 var KEYCODE_SQUIGGLE = 192;
 
+var State = {
+	Menu: 0,
+	Game: 1
+};
+var currentState = 0;
+
 // [GRAPHICS]
 
-var mainContainer;
 var backContainer;
+
+var menuContainer;
+
+var gameContainer;
+var mainContainer;
+var secondaryContainer;
 var debugContainer;
 
 var bgImg;
@@ -74,6 +85,10 @@ function init() {
 	stage.mouseEventEnabled = true;
 
 	manifest = [
+		{src:"title_image_8x.png", id: "title_image"},
+		{src:"menu_board_4x.png", id:"menu_board"},
+		{src:"menu_buttons_6x.png", id:"menu_buttons"},
+
 		{src:"dinos4x.png", id: "dinos"},
 		{src:"spring_upper_ground_4x.png", id: "springupperground"},
 		{src:"spring_main_ground_4x.png", id: "springmainground"},
@@ -88,6 +103,7 @@ function init() {
 		{src:"font2x.png", id:"font2x"},
 		{src:"font4x.png", id:"font4x"},
 		{src:"time_board_4x.png", id:"timer_board"},
+
 		{src:"background_front_4x.png", id:"background_front"},
 		{src:"background_back_4x.png", id:"background_back"}
 	];
@@ -104,9 +120,85 @@ function init() {
 // Called when stage has been created
 function handleComplete() {
 
-	mainContainer = new createjs.Container();
+	// Create containers
 	backContainer = new createjs.Container();
+	menuContainer = new createjs.Container();
+	gameContainer = new createjs.Container();
+	mainContainer = new createjs.Container();
+	secondaryContainer = new createjs.Container();
 	debugContainer = new createjs.Container();
+
+	// Populate containers
+	initMenu();
+	initGame();
+
+	// Add everything to stage
+	stage.addChild(backContainer);
+	stage.addChild(gameContainer);
+	stage.addChild(menuContainer);
+
+	// Move game out of view
+	gameContainer.y = 720;
+
+	// Check for debug mode (~)
+	if (!DEBUG) debugContainer.alpha = 0;
+
+	// Ticker
+	createjs.Ticker.timingMode = createjs.Ticker.RAF;
+	createjs.Ticker.addEventListener("tick", tick);
+
+}
+
+function initMenu() {
+
+	// Create title
+	var title = new createjs.Bitmap(loader.getResult("title_image"));
+	title.regX = 192;
+	title.x = 640;
+	title.y = 0;
+
+	// Create menu board
+	var menuBoard = new createjs.Bitmap(loader.getResult("menu_board"));
+	menuBoard.regX = 200;
+	menuBoard.x = 640;
+	menuBoard.y = 352;
+
+	// Create menu buttons
+	var menuButtonSpritesheet = new createjs.SpriteSheet({
+		framerate: 10,
+		"images": [loader.getResult("menu_buttons")],
+		"frames": {"regX": 165, "height": 48, "count": 6, "regyY": 0, "width": 330},
+		"animations": {
+			"play_off": [0, 0, "play_off", 0.0],
+			"play_on": [1, 1, "play_on", 0.0],
+			"options_off": [2, 2, "options_off", 0.0],
+			"options_on": [3, 3, "options_on", 0.0],
+			"exit_off": [4, 4, "exit_off", 0.0],
+			"exit_on": [5, 5, "exit_on", 0.0]
+		}
+	});
+
+	var menuButtonContainer = new createjs.Container();
+	var playButton = new MenuButton(0, 0, "play", menuButtonSpritesheet);
+	var optionsButton = new MenuButton(0, 56, "options", menuButtonSpritesheet);
+	var exitButton = new MenuButton(0, 112, "exit", menuButtonSpritesheet);
+
+	playButton.select();
+
+	menuButtonContainer.x = 640;
+	menuButtonContainer.y = 400;
+	menuButtonContainer.addChild(playButton.shape);
+	menuButtonContainer.addChild(optionsButton.shape);
+	menuButtonContainer.addChild(exitButton.shape);
+
+	// Add everything to container
+	menuContainer.addChild(title);
+	menuContainer.addChild(menuBoard);
+	menuContainer.addChild(menuButtonContainer);
+
+}
+
+function initGame() {
 
 	// Create ground
 	var ground;
@@ -176,7 +268,7 @@ function handleComplete() {
 	var backgroundFront2 = new Background(-1280, 0, 2, loader.getResult("background_front"));
 	backgroundList = {backgroundBack1, backgroundBack2, backgroundFront1, backgroundFront2};
 
-	// Add everything to the stage
+	// Add everything to the containers
 
 	// Background
 	for (var b in backgroundList) {
@@ -185,16 +277,16 @@ function handleComplete() {
 	}
 
 	// Timer
-	backContainer.addChild(timerBoard.timerContainer);
+	secondaryContainer.addChild(timerBoard.timerContainer);
 
 	// Nests
 	for (var n in nestList) {
 		n = nestList[n];
-		backContainer.addChild(n.shape);
+		secondaryContainer.addChild(n.shape);
 		debugContainer.addChild(n.boundShape);
 		for (var e in n.eggs) {
 			e = n.eggs[e];
-			backContainer.addChild(e.shape);
+			secondaryContainer.addChild(e.shape);
 		}
 	}
 
@@ -220,21 +312,64 @@ function handleComplete() {
 	}
 
 	// Image containers
-	stage.addChild(backContainer);
-	stage.addChild(mainContainer);
-	stage.addChild(debugContainer);
+	gameContainer.addChild(secondaryContainer);
+	gameContainer.addChild(mainContainer);
+	gameContainer.addChild(debugContainer);
 
-	// Check for debug mode (~)
-	if (!DEBUG) debugContainer.alpha = 0;
+}
 
-	// Ticker
-	createjs.Ticker.timingMode = createjs.Ticker.RAF;
-	createjs.Ticker.addEventListener("tick", tick);
+function changeState(state) {
+
+	switch (state) {
+		case State["Menu"]:
+			break;
+		case State["Game"]:
+			break;
+		default:
+			break;
+	}
 
 }
 
 // Called a lot all of the time
 function tick(event) {
+
+	// Do stuff based on current state
+	switch (currentState) {
+		case State["Menu"]:
+			onMenu(event);
+			break;
+		case State["Game"]:
+			onGame(event);
+			break;
+		default:
+			break;
+	}
+
+	// Move background
+	for (var b in backgroundList) {
+		b = backgroundList[b];
+		b.move();
+	}
+
+	// Update changes
+	stage.update(event);
+
+}
+
+// Called when in menu
+function onMenu(event) {
+
+	if (rightDown) {
+		currentState = State["Game"];
+		menuContainer.y = -720;
+		gameContainer.y = 0;
+	}
+
+}
+
+// Called when in game
+function onGame(event) {
 
 	var deltaS = event.delta / 1000;
 
@@ -482,15 +617,6 @@ function tick(event) {
 
 	// Update timer
 	timerBoard.tick(deltaS);
-
-	// Move background
-	for (var b in backgroundList) {
-		b = backgroundList[b];
-		b.move();
-	}
-
-	// Update changes
-	stage.update(event);
 
 }
 
