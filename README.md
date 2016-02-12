@@ -17,19 +17,19 @@ Each player can attack the other, momentarilly stunning the oppenent and returni
 
 ## Controls
 #### Menu
-Up/Down: Change selection
+Up/Down: Change selection  
 Right: Select option
 #### Rex (Left player)
-Move: A & D
-Jump: W
+Move: A & D  
+Jump: W  
 Attack: S
 #### Steg (Right player)
-Move: Left & Right arrows
-Jump: Up arrow
+Move: Left & Right arrows  
+Jump: Up arrow  
 Attack: Down arrow
 
 ## Todo
-Main game functionality - DONE<br>
-End game screen<br>
-Main menu<br>
-More stages<br>
+Main game functionality - DONE  
+End game screen  
+Main menu  
+More stages  
