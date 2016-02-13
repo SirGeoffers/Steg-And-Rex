@@ -4,6 +4,9 @@ var DEBUG = false;
 var canvas;
 var stage;
 
+var stageReady = false;
+var soundReady = false;
+
 // [CONSTANTS]
 
 var GRAVITY = 70;
@@ -106,15 +109,31 @@ function init() {
 
 		{src:"background_front_4x.png", id:"background_front"},
 		{src:"background_back_4x.png", id:"background_back"}
+
 	];
 
 	loader = new createjs.LoadQueue(false);
 	loader.addEventListener("complete", handleComplete);
 	loader.loadManifest(manifest, true, "images/");
 
+	soundManifest = [
+		{id:"main_theme", src:"../sounds/RockYou.mp3"}
+	]
+
+	createjs.Sound.addEventListener("fileload", handleSoundLoad);
+	createjs.Sound.registerSounds(soundManifest, "sounds/");
+
 	document.onkeydown = onKeyDown;
 	document.onkeyup = onKeyUp;
 
+}
+
+function handleSoundLoad(event) {
+	soundReady = true;
+	if (event.id == "main_theme") {
+		var music = createjs.Sound.play(event.src);
+		music.volume = 0.5;
+	}
 }
 
 // Called when stage has been created
@@ -146,6 +165,8 @@ function handleComplete() {
 	// Ticker
 	createjs.Ticker.timingMode = createjs.Ticker.RAF;
 	createjs.Ticker.addEventListener("tick", tick);
+
+	stageReady = true;
 
 }
 
@@ -334,6 +355,10 @@ function changeState(state) {
 // Called a lot all of the time
 function tick(event) {
 
+	if (!stageReady || !soundReady) {
+		return;
+	}
+	
 	// Do stuff based on current state
 	switch (currentState) {
 		case State["Menu"]:

@@ -1,13 +1,13 @@
 # Steg and Rex
 
 ## About
-This is a small game written in JavaScript, utilizing the CreateJS suite.
-<br><br>
-The original game and art was made by Jordan Sayer.
-<br>
-Please visit http://jmakegames.itch.io/steg-and-rex for the original game.
-<br>
+This is a small game written in JavaScript, utilizing the CreateJS suite.  
+  
+The original game and art was made by Jordan Sayer.  
+Please visit http://jmakegames.itch.io/steg-and-rex for the original game.  
 Also visit http://www.jmakegames.com/ for other cool games by Jordan.
+
+Music by [Snabisch](http://snabisch.blogspot.com.es/)
 
 ## Gameplay
 This is a local 2-player game competitive game.
