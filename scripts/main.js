@@ -4,8 +4,8 @@ var DEBUG = false;
 var canvas;
 var stage;
 
-var stageReady = false;
-var soundReady = false;
+var stageReady = true;
+var soundReady = true;
 
 // [CONSTANTS]
 
@@ -45,6 +45,9 @@ var bgImg;
 // Menu
 var titleImg;
 var startButtonImg;
+
+var buttonList;
+var selectedButton;
 
 // Game
 var steg;
@@ -116,25 +119,25 @@ function init() {
 	loader.addEventListener("complete", handleComplete);
 	loader.loadManifest(manifest, true, "images/");
 
-	soundManifest = [
-		{id:"main_theme", src:"../sounds/RockYou.mp3"}
-	]
+	//soundManifest = [
+	//	{id:"main_theme", src:"../sounds/RockYou.mp3"}
+	//]
 
-	createjs.Sound.addEventListener("fileload", handleSoundLoad);
-	createjs.Sound.registerSounds(soundManifest, "sounds/");
+	//createjs.Sound.addEventListener("fileload", handleSoundLoad);
+	//createjs.Sound.registerSounds(soundManifest, "sounds/");
 
 	document.onkeydown = onKeyDown;
 	document.onkeyup = onKeyUp;
 
 }
 
-function handleSoundLoad(event) {
-	soundReady = true;
-	if (event.id == "main_theme") {
-		var music = createjs.Sound.play(event.src);
-		music.volume = 0.5;
-	}
-}
+//function handleSoundLoad(event) {
+//	soundReady = true;
+//	if (event.id == "main_theme") {
+//		//var music = createjs.Sound.play(event.src);
+//		//music.volume = 0.5;
+//	}
+//}
 
 // Called when stage has been created
 function handleComplete() {
@@ -204,7 +207,10 @@ function initMenu() {
 	var optionsButton = new MenuButton(0, 56, "options", menuButtonSpritesheet);
 	var exitButton = new MenuButton(0, 112, "exit", menuButtonSpritesheet);
 
+	buttonList = [playButton, optionsButton, exitButton];
+
 	playButton.select();
+	selectedButton = 0;
 
 	menuButtonContainer.x = 640;
 	menuButtonContainer.y = 400;
@@ -345,10 +351,14 @@ function changeState(state) {
 		case State["Menu"]:
 			break;
 		case State["Game"]:
+			menuContainer.y = 720;
+			gameContainer.y = 0;
 			break;
 		default:
 			break;
 	}
+
+	currentState = state;
 
 }
 
@@ -386,9 +396,43 @@ function tick(event) {
 function onMenu(event) {
 
 	if (rightDown) {
-		currentState = State["Game"];
-		menuContainer.y = -720;
-		gameContainer.y = 0;
+
+		switch(selectedButton) {
+
+			case 0:
+				changeState(State["Game"]);
+				break;
+			case 1:
+				break;
+
+		}
+
+		
+	}
+
+}
+
+function navigateMenu(event) {
+
+	switch(event.keyCode) {
+
+		case KEYCODE_LEFT:
+			break;
+		case KEYCODE_RIGHT:
+			break;
+		case KEYCODE_UP:
+			buttonList[selectedButton].deselect();
+			selectedButton--;
+			if (selectedButton < 0) selectedButton = 2;
+			buttonList[selectedButton].select();
+			break;
+		case KEYCODE_DOWN:
+			buttonList[selectedButton].deselect();
+			selectedButton++;
+			selectedButton %= 3;
+			buttonList[selectedButton].select();
+			break;
+
 	}
 
 }
@@ -660,6 +704,10 @@ function toggleDebug() {
 // Called when a key is pressed
 function onKeyDown(event) {
 	
+	if (currentState == State["Menu"]) {
+		navigateMenu(event);
+	}
+
 	switch(event.keyCode) {
 
 		case KEYCODE_A:
