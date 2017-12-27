@@ -30,6 +30,6 @@ Attack: Down arrow
 
 ## Todo
 Main game functionality - DONE  
-End game screen  
-Main menu  
-More stages  
+End game screen - NOT STARTED
+Main menu - PARTIAL
+More stages - NOT STARTED
