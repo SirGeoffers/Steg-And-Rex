@@ -9,7 +9,7 @@ var soundReady = true;
 
 // [CONSTANTS]
 
-var GRAVITY = 70;
+var GRAVITY = 3800;
 
 var KEYCODE_ENTER = 13;
 var KEYCODE_SPACE = 32;
@@ -472,7 +472,7 @@ function onGame(event) {
 		
 
 		// Update Rex y velocity
-		rex.yVel += GRAVITY;
+		rex.yVel += GRAVITY * deltaS;
 		if (wDown && rex.jumpReady && !rex.jumping && !rex.stunned) {
 			rex.jumping = true;
 			rex.jumpReady = false;
@@ -498,7 +498,7 @@ function onGame(event) {
 		
 
 		// Update Steg y velocity
-		steg.yVel += GRAVITY;
+		steg.yVel += GRAVITY * deltaS;
 		if (upDown && steg.jumpReady && !steg.jumping && !steg.stunned) {
 			steg.jumping = true;
 			steg.jumpReady = false;
